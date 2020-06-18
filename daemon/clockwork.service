@@ -1,0 +1,11 @@
+[Unit]
+Description=Clockwork service
+After=lipstick.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/clockwork
+Restart=always
+
+[Install]
+WantedBy=user-session.target

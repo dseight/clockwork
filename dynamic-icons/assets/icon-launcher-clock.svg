@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="86px" height="86px" viewBox="0 0 86 86" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon-launcher-clock</title>
+    <defs>
+        <linearGradient x1="14.6444965%" y1="85.3556206%" x2="85.3552693%" y2="14.6448478%" id="linearGradient-1">
+            <stop stop-color="#E36C34" offset="0%"></stop>
+            <stop stop-color="#FFB757" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="icon-launcher-clock" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="bg" fill="url(#linearGradient-1)" fill-rule="nonzero" cx="43" cy="43" r="42.7"></circle>
+        <circle id="dial" fill="#F9F8D9" fill-rule="nonzero" opacity="0.9" cx="43" cy="43" r="32.025"></circle>
+        <g id="hour-hand" transform="rotate(125, 43, 43) translate(38.000000, 24.500000)">
+            <rect id="hour-hand-bounds" x="0" y="3.49018592e-11" width="10" height="37"></rect>
+            <path d="M5,2.13162821e-14 C6.52466579,2.13162821e-14 7.78368332,1.13737544 7.97487424,2.60994796 L7.97,2.61 L9.95820674,17.8505529 C9.98577935,18.0631347 10,18.2799067 10,18.5 C10,21.2614237 7.76142375,23.5 5,23.5 C2.23857625,23.5 0,21.2614237 0,18.5 C0,18.279559 0.0142656197,18.0624499 0.041924035,17.8495455 L2.03,2.61 L2.02525611,2.60894536 C2.21688819,1.13685921 3.47568025,2.13162821e-14 5,2.13162821e-14 Z" id="hand" fill="#1472A0"></path>
+        </g>
+        <g id="minute-hand" transform="rotate(0, 43, 43) translate(38.000000, 17.500000)">
+            <rect id="minute-hand-bounds" x="5.68434189e-14" y="0" width="10" height="51"></rect>
+            <path d="M5,-2.13162821e-14 C6.56552888,-2.13162821e-14 7.85097922,1.1991588 7.98793022,2.7290556 L7.99,2.73 L9.97996947,25.0493853 C9.993228,25.1978182 10,25.3481182 10,25.5 C10,28.2614237 7.76142375,30.5 5,30.5 C2.23857625,30.5 0,28.2614237 0,25.5 C0,25.3484627 0.00674132308,25.1984998 0.019940433,25.0503951 L2.01198018,2.73005842 C2.1484591,1.19968285 3.43412908,-2.13162821e-14 5,-2.13162821e-14 Z" id="hand" fill="#1472A0"></path>
+        </g>
+    </g>
+</svg>

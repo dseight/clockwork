@@ -1,0 +1,16 @@
+RPMS
+installroot
+daemon/clockwork
+lib/pkgconfig
+translations/settings-clockwork.ts
+Makefile
+moc_*
+*.list
+*.pro.user
+*.prl
+*.o
+*.moc
+*.so
+*.so.*
+*.qm
+.DS_Store

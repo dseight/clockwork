@@ -1,0 +1,16 @@
+{
+    "translation_catalog": "settings-clockwork",
+    "entries": [
+        {
+            "path": "system_settings/look_and_feel/clockwork",
+            "title": "Clockwork",
+            "translation_id": "clockwork_settings-he",
+            "type": "page",
+            "icon": "image://theme/icon-m-clock",
+            "order": 450,
+            "params": {
+                "source": "/usr/share/jolla-settings/pages/clockwork/clockwork.qml"
+            }
+        }
+    ]
+}

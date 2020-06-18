@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="86px" height="86px" viewBox="0 0 86 86" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>icon-launcher-calendar</title>
+    <defs>
+        <linearGradient x1="0.00234458343%" y1="100%" x2="99.9976554%" y2="0%" id="linearGradient-1">
+            <stop stop-color="#B3B3B3" offset="0%"></stop>
+            <stop stop-color="#E6E6E6" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="0%" y1="50%" x2="100%" y2="50%" id="linearGradient-2">
+            <stop stop-color="#FF4747" offset="0%"></stop>
+            <stop stop-color="#FF9666" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="icon-launcher-calendar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M0.35,1.772 L0.35,84.229 C0.35,85.014 0.986,85.651 1.772,85.651 L43,85.651 C66.556,85.651 85.65,66.555 85.65,43.001 L85.65,1.771 C85.65,0.986 84.954,0.349 84.169,0.349 L1.772,0.349 C0.987,0.35 0.35,0.987 0.35,1.772 Z" id="bg" fill="url(#linearGradient-1)" fill-rule="nonzero"></path>
+        <path d="M10.192,85.65 L42.474,85.65 C66.32,85.65 85.65,66.554 85.65,43 L85.65,26.337 L10.192,26.337 L10.192,85.65 Z" id="bottom" fill="#F9F8D9" fill-rule="nonzero"></path>
+        <path d="M85.65,11 L11.8727336,11 C10.9435072,11 10.19,11.778 10.19,12.738 L10.19,27 L85.65,27 L85.65,11 Z" id="top" fill="url(#linearGradient-2)" fill-rule="nonzero"></path>
+        <text id="date" x="48" y="70" font-family="SailSansPro-Light, Source Sans Pro, Helvetica" text-anchor="middle" font-size="48" font-weight="300" fill="#000000">31</text>
+    </g>
+</svg>
