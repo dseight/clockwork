@@ -16,6 +16,7 @@ public:
         IconSourceRole,
         AvailableRole,
         EnabledRole,
+        UniqueRole,
     };
     Q_ENUM(Roles)
 
@@ -28,6 +29,7 @@ public:
 
 private:
     const QList<DynamicIcon *> m_icons;
+    QHash<QString, int> m_iconsCountForPackage;
 };
 
 class DynamicIconsSortModel : public QSortFilterProxyModel

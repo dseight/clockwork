@@ -7,6 +7,8 @@ DynamicIconsModel::DynamicIconsModel(QObject *parent)
     , m_icons(loadDynamicIcons())
 {
     for (auto icon : m_icons) {
+        m_iconsCountForPackage[icon->packageName()]++;
+
         connect(icon, &DynamicIcon::enabledChanged, this, [=]() {
             const auto row = m_icons.indexOf(icon);
             const auto index = createIndex(row, 0);
@@ -38,6 +40,8 @@ QVariant DynamicIconsModel::data(const QModelIndex &index, int role) const
         return icon->available();
     case EnabledRole:
         return icon->enabled();
+    case UniqueRole:
+        return m_iconsCountForPackage[icon->packageName()] == 1;
     default:
         return {};
     }
@@ -68,6 +72,7 @@ QHash<int, QByteArray> DynamicIconsModel::roleNames() const
         {NameRole, "name"},
         {IconSourceRole, "iconSource"},
         {EnabledRole, "enabled"},
+        {UniqueRole, "unique"},
     };
     return names;
 }

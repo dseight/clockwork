@@ -37,9 +37,9 @@ Page {
                     iconSource: model.iconSource
                     text: model.applicationName
 
-                    // TODO: show only if there are several dynamic icons
+                    // Displayed only if there are several dynamic icons
                     // for a single application
-                    showDescription: true
+                    showDescription: !model.unique
                     description: model.name
 
                     iconSwitch.automaticCheck: false
