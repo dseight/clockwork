@@ -47,6 +47,12 @@ DynamicIconPrivate::DynamicIconPrivate(const QString &packageName,
 
     applicationProvider = new MGConfItem(dconfPath, this);
 
+    // Automatically enable new dynamic icon, if there is no user configuration
+    // for this application yet.
+    const auto none = QStringLiteral("<none>");
+    if (applicationProvider->value(none).toString() == none)
+        applicationProvider->set(name);
+
     connect(applicationProvider, &MGConfItem::valueChanged, parent, &DynamicIcon::enabledChanged);
 }
 
