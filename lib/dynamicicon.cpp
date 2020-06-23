@@ -116,10 +116,10 @@ void registerDynamicIconMeta(const QMetaObject &meta)
 
 const QList<DynamicIcon *> loadDynamicIcons()
 {
-    static QList<DynamicIcon *> dynamicIcons;
+    static QMap<QString, DynamicIcon *> dynamicIcons;
 
     if (!dynamicIcons.isEmpty())
-        return dynamicIcons;
+        return dynamicIcons.values();
 
     loadDynamicIconPlugins();
 
@@ -132,9 +132,17 @@ const QList<DynamicIcon *> loadDynamicIcons()
             continue;
         }
 
-        dynamicIcons.append(dynamicIcon);
+        const auto name = dynamicIcon->name();
+
+        if (dynamicIcons.contains(name)) {
+            qWarning() << "Dynamic icon with name" << name << "is already registered.";
+            delete dynamicIcon;
+            continue;
+        }
+
+        dynamicIcons[name] = dynamicIcon;
         qDebug() << "Loaded dynamic icon:" << meta.className();
     }
 
-    return dynamicIcons;
+    return dynamicIcons.values();
 }
