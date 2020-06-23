@@ -41,6 +41,11 @@ public:
     {
         Q_ASSERT(QLatin1String(uri) == QLatin1String("com.dseight.clockwork"));
 
+        // Always load default translations first, otherwise we'll see
+        // only string IDs when running jolla-settings from terminal
+        auto *defaultTranslator = new ClockworkSettingsTranslator(engine);
+        defaultTranslator->load("settings-clockwork", "/usr/share/clockwork/translations");
+
         auto *translator = new ClockworkSettingsTranslator(engine);
         translator->load(QLocale(), "settings-clockwork", "-", "/usr/share/clockwork/translations");
 
