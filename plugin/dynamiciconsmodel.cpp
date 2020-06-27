@@ -35,7 +35,7 @@ QVariant DynamicIconsModel::data(const QModelIndex &index, int role) const
     case NameRole:
         return icon->name();
     case IconSourceRole:
-        return QStringLiteral("image://clockwork/%1").arg(icon->name());
+        return QStringLiteral("image://clockwork/dynamic-icon/%1").arg(icon->name());
     case AvailableRole:
         return icon->available();
     case EnabledRole:

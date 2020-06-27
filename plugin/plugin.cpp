@@ -1,5 +1,7 @@
+#include "appgridiconprovider.h"
 #include "clockworkimageprovider.h"
 #include "dynamiciconsmodel.h"
+#include "iconpacksmodel.h"
 #include <QQmlEngine>
 #include <QQmlExtensionPlugin>
 #include <QTranslator>
@@ -59,6 +61,8 @@ public:
 
         qmlRegisterType<DynamicIconsModel>(uri, 1, 0, "DynamicIconsModel");
         qmlRegisterType<DynamicIconsSortModel>(uri, 1, 0, "DynamicIconsSortModel");
+        qmlRegisterType<IconPacksModel>(uri, 1, 0, "IconPacksModel");
+        qmlRegisterType<AppGridIconProvider>(uri, 1, 0, "AppGridIconProvider");
     }
 };
 

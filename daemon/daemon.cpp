@@ -1,6 +1,9 @@
 #include "clockworkglobal_p.h"
 #include "dynamicicon.h"
 #include "dynamicicon_p.h"
+#include "iconpack.h"
+#include "iconpackfactory.h"
+#include "iconpackupdater.h"
 #include "iconupdater.h"
 #include <csignal>
 #include <sys/socket.h>
@@ -16,6 +19,7 @@ int sigtermFd[2];
 QSocketNotifier *termNotifier;
 
 QHash<DynamicIcon *, IconUpdater *> dynamicIconUpdaters;
+QHash<IconPack *, IconPackUpdater *> iconPackUpdaters;
 
 void dynamicIconAvailabilityChanged(DynamicIcon *icon)
 {
@@ -26,6 +30,18 @@ void dynamicIconAvailabilityChanged(DynamicIcon *icon)
     } else if (!enable && dynamicIconUpdaters[icon] != nullptr) {
         delete dynamicIconUpdaters[icon];
         dynamicIconUpdaters[icon] = nullptr;
+    }
+}
+
+void iconPackAvailabilityChanged(IconPack *iconPack)
+{
+    bool enable = iconPack->enabled();
+
+    if (enable && iconPackUpdaters[iconPack] == nullptr) {
+        iconPackUpdaters[iconPack] = iconPack->iconPackUpdater();
+    } else if (!enable && iconPackUpdaters[iconPack] != nullptr) {
+        delete iconPackUpdaters[iconPack];
+        iconPackUpdaters[iconPack] = nullptr;
     }
 }
 
@@ -82,6 +98,9 @@ int main(int argc, char *argv[])
         for (auto updater : qAsConst(dynamicIconUpdaters)) {
             delete updater;
         }
+        for (auto updater : qAsConst(iconPackUpdaters)) {
+            delete updater;
+        }
     });
 
     for (auto icon : loadDynamicIcons()) {
@@ -93,6 +112,15 @@ int main(int argc, char *argv[])
         });
         QObject::connect(icon, &DynamicIcon::enabledChanged, [=]() {
             dynamicIconAvailabilityChanged(icon);
+        });
+    }
+
+    for (auto iconPack : IconPackFactory::loadIconPacks()) {
+        if (iconPack->enabled()) {
+            iconPackUpdaters[iconPack] = iconPack->iconPackUpdater();
+        }
+        QObject::connect(iconPack, &IconPack::enabledChanged, [=]() {
+            iconPackAvailabilityChanged(iconPack);
         });
     }
 

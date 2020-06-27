@@ -16,6 +16,9 @@ DEFINES += CLOCKWORK_BUILD_LIBRARY
 SOURCES += \
     desktopentry.cpp \
     dynamicicon.cpp \
+    iconpack.cpp \
+    iconpackfactory.cpp \
+    iconpackupdater.cpp \
     iconprovider.cpp \
     iconupdater.cpp \
     svgiconrender.cpp
@@ -32,6 +35,10 @@ HEADERS += \
     clockworkglobal_p.h \
     desktopentry.h \
     dynamicicon_p.h \
+    iconpack.h \
+    iconpack_p.h \
+    iconpackfactory.h \
+    iconpackupdater.h \
     iconupdater_p.h
 
 target.path = $$[QT_INSTALL_LIBS]

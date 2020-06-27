@@ -21,12 +21,16 @@ target.path = $$TARGETPATH
 
 SOURCES += \
     plugin.cpp \
+    appgridiconprovider.cpp \
     clockworkimageprovider.cpp \
-    dynamiciconsmodel.cpp
+    dynamiciconsmodel.cpp \
+    iconpacksmodel.cpp
 
 HEADERS += \
+    appgridiconprovider.h \
     clockworkimageprovider.h \
-    dynamiciconsmodel.h
+    dynamiciconsmodel.h \
+    iconpacksmodel.h
 
 OTHER_FILES += qmldir *.qml
 

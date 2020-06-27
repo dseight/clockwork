@@ -20,5 +20,30 @@
         <source>Dynamic icons</source>
         <translation>Динамические иконки</translation>
     </message>
+    <message id="settings_clockwork-icon_packs">
+        <source>Icon packs</source>
+        <translation>Наборы иконок</translation>
+    </message>
+    <message id="settings_clockwork-icon_pack_enabled">
+        <source>In use</source>
+        <translation>Используется</translation>
+    </message>
+    <message id="settings_clockwork-not_use">
+        <source>Not use</source>
+        <translation>Не использовать</translation>
+    </message>
+    <message id="settings_clockwork-use">
+        <source>Use</source>
+        <translation>Использовать</translation>
+    </message>
+    <message id="settings_clockwork-no_icon_packs_avail">
+        <source>No icon packs available</source>
+        <translation>Нет доступных наборов иконок</translation>
+    </message>
+    <message id="settings_clockwork-use_some_icon_pack">
+        <source>Use %1?</source>
+        <extracomment>%1 is the icon pack name</extracomment>
+        <translation>Использовать %1?</translation>
+    </message>
 </context>
 </TS>
