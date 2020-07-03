@@ -16,6 +16,7 @@ DEFINES += CLOCKWORK_BUILD_LIBRARY
 SOURCES += \
     desktopentry.cpp \
     dynamicicon.cpp \
+    harbourthemepack.cpp \
     iconpack.cpp \
     iconpackfactory.cpp \
     iconpackupdater.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     clockworkglobal_p.h \
     desktopentry.h \
     dynamicicon_p.h \
+    harbourthemepack.h \
     iconpack.h \
     iconpack_p.h \
     iconpackfactory.h \

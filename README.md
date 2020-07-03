@@ -9,6 +9,8 @@
 Clockwork allows you to customize Sailfish OS launcher icons and dynamically
 update them.
 
+You can instantly apply any icon pack made for [Theme pack support for Sailfish OS].
+
 There is built-in support of dynamic icon plugins: you can create custom one
 to dynamically update icon for *any* application. Default dynamic icon plugin
 supports updating of Clock and Calendar icons.
@@ -50,3 +52,4 @@ Clockwork is provided under the [MIT license](LICENSE).
 
 
 [Sailfish OS Coding Conventions]: https://sailfishos.org/wiki/Coding_Conventions
+[Theme pack support for Sailfish OS]: https://github.com/uithemer/themepacksupport-sailfishos
