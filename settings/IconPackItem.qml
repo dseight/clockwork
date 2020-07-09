@@ -41,8 +41,8 @@ ListItem {
     OpacityRampEffect {
         sourceItem: preview
         direction: OpacityRamp.RightToLeft
-        offset: 0.0
-        slope: preview.width / (preview.width - textLabel.width - 2 * Theme.paddingLarge)
+        offset: iconSize / preview.width
+        slope: preview.width / (preview.width - iconSize - textLabel.width - 2 * Theme.paddingLarge)
     }
 
     Column {
