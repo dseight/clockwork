@@ -11,6 +11,7 @@ BuildRequires: pkgconfig(Qt5Qml)
 BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: pkgconfig(sailfishsilica)
 BuildRequires: qt5-qttools-linguist
+Provides: harbour-themepacksupport = 0.8.9-1
 Conflicts: harbour-dyncal
 Conflicts: harbour-dynclock
 
