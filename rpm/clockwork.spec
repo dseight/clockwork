@@ -80,3 +80,15 @@ fi
 
 %postun
 /sbin/ldconfig
+
+# Restart daemon when new icon pack is installed
+%transfiletriggerin -- %{_datadir}
+if grep -qF %{_datadir}/harbour-themepack- ; then
+    systemctl-user try-restart %{name}.service
+fi
+
+# Restart daemon when icon pack is removed
+%transfiletriggerun -- %{_datadir}
+if grep -qF %{_datadir}/harbour-themepack- ; then
+    systemctl-user try-restart %{name}.service
+fi
