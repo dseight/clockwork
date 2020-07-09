@@ -15,8 +15,13 @@ public:
     void updateThemeIcon();
     void restoreThemeIcon();
 
+    void updateThirdPartyIcon();
+    void restoreThirdPartyIcon();
+
     IconProvider *provider;
     QString desktopPath;
+    QString iconPath;
+    bool themeIcon;
 };
 
 #endif // ICONUPDATER_P_H

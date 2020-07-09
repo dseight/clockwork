@@ -2,13 +2,18 @@
 #include "desktopentry.h"
 #include "iconprovider.h"
 #include "iconupdater_p.h"
+#include <MDesktopEntry>
 #include <MGConfItem>
 #include <silicatheme.h>
+#include <silicathemeiconresolver.h>
+#include <sys/stat.h>
+#include <QCryptographicHash>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QImage>
+#include <QStandardPaths>
 
 namespace {
 
@@ -40,12 +45,165 @@ QString generateIconPath(const QString &desktopPath)
     return QStringLiteral("/usr/share/clockwork/icons/%1-%2.png").arg(info.baseName(), currentSecs);
 }
 
+QString normalizePath(const QString &path)
+{
+    return QCryptographicHash::hash(path.toLatin1(), QCryptographicHash::Sha1).toHex();
+}
+
+QString getDconfFingerprintPath(const QString &path)
+{
+    return QStringLiteral("/com/dseight/clockwork/fingerprint/%1").arg(normalizePath(path));
+}
+
+QString getFileFingerprint(const QString &path)
+{
+    QByteArray ba = path.toLocal8Bit();
+    struct stat sb;
+
+    if (stat(ba.data(), &sb)) {
+        qWarning() << "Could not stat" << path;
+        return {};
+    }
+
+    return QString::number(sb.st_ino, 16) + QString::number(sb.st_size, 16)
+           + QString::number(sb.st_mtim.tv_sec, 16) + QString::number(sb.st_mtim.tv_nsec, 16);
+}
+
+QString getStoredFingerprint(const QString &path)
+{
+    MGConfItem dconf(getDconfFingerprintPath(path));
+    return dconf.value("<unknown>").toString();
+}
+
+void storeFingerprint(const QString &path, const QString &fingerprint)
+{
+    MGConfItem dconf(getDconfFingerprintPath(path));
+    dconf.set(fingerprint);
+}
+
+bool isOurIcon(const QString &iconPath)
+{
+    return getFileFingerprint(iconPath) == getStoredFingerprint(iconPath);
+}
+
+QString getIconBackupPath(const QString &iconPath)
+{
+    const auto dataPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    return QStringLiteral("%1/clockwork/backup/%2").arg(dataPath, normalizePath(iconPath));
+}
+
+void backupIcon(const QString &iconPath)
+{
+    const auto iconBackupPath = getIconBackupPath(iconPath);
+
+    // Create backup directory if not exist yet
+    QFileInfo(iconBackupPath).dir().mkpath(".");
+
+    QFile::remove(iconBackupPath);
+    QFile::copy(iconPath, iconBackupPath);
+}
+
+void restoreIcon(const QString &iconPath)
+{
+    const auto iconBackupPath = getIconBackupPath(iconPath);
+    QFile::remove(iconPath);
+    QFile::copy(iconBackupPath, iconPath);
+}
+
+bool touchFile(const QString &path)
+{
+    QFile file(path);
+
+    // Do not create new file, only update existing
+    if (!file.exists() || !file.open(QIODevice::Append))
+        return false;
+
+    return futimens(file.handle(), NULL) == 0;
+}
+
+QString resolveIconPath(const QString &iconId)
+{
+    // Using direct path to icon instead of ID
+    if (iconId.startsWith("/"))
+        return iconId;
+
+    Silica::ThemeIconResolver iconResolver;
+    const auto resolvedPath = iconResolver.resolvePath(iconId);
+
+    // First try to use icon with proper scale, because ThemeIconResolver
+    // returns 86x86 icon for third-party apps
+    if (resolvedPath.contains("86x86")) {
+        const auto iconSize = Silica::Theme::instance()->iconSizeLauncher();
+        const auto size = QStringLiteral("%1x%1").arg(QString::number(iconSize, 'f', 0));
+
+        QString scaledPath(resolvedPath);
+        scaledPath.replace("86x86", size);
+
+        if (QFile::exists(scaledPath))
+            return scaledPath;
+    }
+
+    return resolvedPath;
+}
+
+bool isThemeIcon(const QString &iconPath)
+{
+    return iconPath.startsWith("/usr/share/themes/") || iconPath.startsWith("/var/lib/apkd/");
+}
+
 } // namespace
 
 IconUpdaterPrivate::IconUpdaterPrivate(IconProvider *provider, const QString &desktopPath)
     : provider(provider)
     , desktopPath(desktopPath)
 {
+    MDesktopEntry desktopEntry(desktopPath);
+    iconPath = resolveIconPath(desktopEntry.icon());
+    themeIcon = isThemeIcon(iconPath);
+}
+
+void IconUpdaterPrivate::updateThirdPartyIcon()
+{
+    if (iconPath.isEmpty()) {
+        qWarning() << "Icon path for" << desktopPath << "is unresolved, ignoring update request";
+        return;
+    }
+
+    if (!isOurIcon(iconPath))
+        backupIcon(iconPath);
+
+    if (!QFile::remove(iconPath)) {
+        qDebug() << "Could not remove" << iconPath;
+        return;
+    }
+
+    const auto size = qRound(Silica::Theme::instance()->iconSizeLauncher());
+    QImage icon = provider->requestImage({size, size});
+
+    if (!icon.save(iconPath)) {
+        qWarning() << "Could not save new icon to" << iconPath << ", icon update aborted";
+        return;
+    }
+
+    if (!touchFile(desktopPath)) {
+        qWarning() << "Could not touch desktop file" << desktopPath << ", icon update aborted";
+        return;
+    }
+
+    storeFingerprint(iconPath, getFileFingerprint(iconPath));
+
+    qDebug() << "Updated icon for" << desktopPath;
+}
+
+void IconUpdaterPrivate::restoreThirdPartyIcon()
+{
+    if (iconPath.isEmpty() || !isOurIcon(iconPath))
+        return;
+
+    restoreIcon(iconPath);
+    touchFile(desktopPath);
+
+    qDebug() << "Restored icon for" << desktopPath;
 }
 
 void IconUpdaterPrivate::updateThemeIcon()
@@ -119,10 +277,18 @@ IconUpdater::IconUpdater(IconProvider *provider, const QString &desktopPath, QOb
 
 IconUpdater::~IconUpdater()
 {
-    d_ptr->restoreThemeIcon();
+    if (d_ptr->themeIcon) {
+        d_ptr->restoreThemeIcon();
+    } else {
+        d_ptr->restoreThirdPartyIcon();
+    }
 }
 
 void IconUpdater::update()
 {
-    d_ptr->updateThemeIcon();
+    if (d_ptr->themeIcon) {
+        d_ptr->updateThemeIcon();
+    } else {
+        d_ptr->updateThirdPartyIcon();
+    }
 }
