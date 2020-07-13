@@ -3,47 +3,28 @@
 #include "dynamicicon_p.h"
 #include "iconpack.h"
 #include "iconpackfactory.h"
-#include "iconpackupdater.h"
 #include "iconupdater.h"
+#include <MDesktopEntry>
+#include <MGConfItem>
 #include <csignal>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <QDebug>
+#include <QDir>
 #include <QGuiApplication>
 #include <QHash>
 #include <QSocketNotifier>
+#include <QUrl>
 
 namespace {
 
 int sigtermFd[2];
 QSocketNotifier *termNotifier;
 
-QHash<DynamicIcon *, IconUpdater *> dynamicIconUpdaters;
-QHash<IconPack *, IconPackUpdater *> iconPackUpdaters;
-
-void dynamicIconAvailabilityChanged(DynamicIcon *icon)
-{
-    bool enable = icon->available() && icon->enabled();
-
-    if (enable && dynamicIconUpdaters[icon] == nullptr) {
-        dynamicIconUpdaters[icon] = icon->iconUpdater();
-    } else if (!enable && dynamicIconUpdaters[icon] != nullptr) {
-        delete dynamicIconUpdaters[icon];
-        dynamicIconUpdaters[icon] = nullptr;
-    }
-}
-
-void iconPackAvailabilityChanged(IconPack *iconPack)
-{
-    bool enable = iconPack->enabled();
-
-    if (enable && iconPackUpdaters[iconPack] == nullptr) {
-        iconPackUpdaters[iconPack] = iconPack->iconPackUpdater();
-    } else if (!enable && iconPackUpdaters[iconPack] != nullptr) {
-        delete iconPackUpdaters[iconPack];
-        iconPackUpdaters[iconPack] = nullptr;
-    }
-}
+QHash<QString, MGConfItem *> applicationConfItems;
+QHash<QString, DynamicIcon *> dynamicIcons;
+QHash<QString, IconPack *> iconPacks;
+QHash<QString, IconUpdater *> updaters;
 
 void termSignalHandler(int)
 {
@@ -83,6 +64,103 @@ void setupSignalHandlers()
         qFatal("Could not setup signal handler");
 }
 
+MGConfItem *currentIconPackConf()
+{
+    static const auto path = QStringLiteral("/com/dseight/clockwork/icon-pack");
+    static MGConfItem *conf = new MGConfItem(path);
+    return conf;
+}
+
+MGConfItem *applicationConf(const QString &desktopPath)
+{
+    auto conf = applicationConfItems.value(desktopPath, nullptr);
+
+    if (conf)
+        return conf;
+
+    QFileInfo desktopInfo(desktopPath);
+    const auto dconfPath = QStringLiteral("/com/dseight/clockwork/applications/%1/provider")
+                               .arg(desktopInfo.baseName());
+
+    conf = new MGConfItem(dconfPath);
+    applicationConfItems[desktopPath] = conf;
+
+    return conf;
+}
+
+QUrl getProviderUri(const QString &desktopPath)
+{
+    // Try to find application-specific settings first
+    const auto applicationProvider = applicationConf(desktopPath)->value().toString();
+
+    if (!applicationProvider.isEmpty())
+        return applicationProvider;
+
+    // Then look at globally set icon pack
+    const auto iconPack = currentIconPackConf()->value().toString();
+
+    if (!iconPack.isEmpty())
+        return QUrl("icon-pack://" + iconPack);
+
+    return {};
+}
+
+IconUpdater *createIconPackUpdater(const QString &name,
+                                   const QString &desktopPath,
+                                   const QString &iconId = QString())
+{
+    const auto iconPack = iconPacks.value(name, nullptr);
+
+    if (!iconPack)
+        return nullptr;
+
+    if (iconId.isEmpty()) {
+        const auto defaultIconId = iconPack->iconByDesktopPath(desktopPath);
+        return defaultIconId.isEmpty() ? nullptr
+                                       : iconPack->iconUpdater(desktopPath, defaultIconId);
+    } else {
+        return iconPack->iconUpdater(desktopPath, iconId);
+    }
+}
+
+IconUpdater *createDynamicIconUpdater(const QString &name)
+{
+    const auto dynamicIcon = dynamicIcons.value(name, nullptr);
+    return dynamicIcon ? dynamicIcon->iconUpdater() : nullptr;
+}
+
+IconUpdater *createIconUpdater(const QString &desktopPath)
+{
+    const auto uri = getProviderUri(desktopPath);
+    const auto scheme = uri.scheme();
+
+    if (scheme == QStringLiteral("icon-pack")) {
+        return createIconPackUpdater(uri.host(), desktopPath, uri.path());
+    } else if (scheme == QStringLiteral("dynamic-icon")) {
+        return createDynamicIconUpdater(uri.host());
+    }
+
+    return nullptr;
+}
+
+void rebuildIconUpdaters()
+{
+    for (auto updater : qAsConst(updaters))
+        delete updater;
+
+    QDir dir(QStringLiteral("/usr/share/applications"));
+    const auto infoList = dir.entryInfoList({"*.desktop"}, QDir::Files);
+    for (const auto &info : infoList) {
+        const auto desktopPath = info.absoluteFilePath();
+        MDesktopEntry desktopEntry(desktopPath);
+
+        if (desktopEntry.noDisplay())
+            continue;
+
+        updaters[desktopPath] = createIconUpdater(desktopPath);
+    }
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -95,34 +173,31 @@ int main(int argc, char *argv[])
     setupSignalHandlers();
 
     QObject::connect(&app, &QGuiApplication::aboutToQuit, &app, []() {
-        for (auto updater : qAsConst(dynamicIconUpdaters)) {
+        for (auto updater : qAsConst(updaters))
             delete updater;
-        }
-        for (auto updater : qAsConst(iconPackUpdaters)) {
-            delete updater;
-        }
     });
 
-    for (auto icon : loadDynamicIcons()) {
-        if (icon->available() && icon->enabled()) {
-            dynamicIconUpdaters[icon] = icon->iconUpdater();
-        }
-        QObject::connect(icon, &DynamicIcon::availableChanged, [=]() {
-            dynamicIconAvailabilityChanged(icon);
-        });
-        QObject::connect(icon, &DynamicIcon::enabledChanged, [=]() {
-            dynamicIconAvailabilityChanged(icon);
+    // Watch for global icon changes
+    QObject::connect(currentIconPackConf(), &MGConfItem::valueChanged, rebuildIconUpdaters);
+
+    // Watch for per-application icon changes
+    QDir dir(QStringLiteral("/usr/share/applications"));
+    const auto infoList = dir.entryInfoList({"*.desktop"}, QDir::Files);
+    for (const auto &info : infoList) {
+        const auto desktopPath = info.absoluteFilePath();
+        QObject::connect(applicationConf(desktopPath), &MGConfItem::valueChanged, [=]() {
+            delete updaters[desktopPath];
+            updaters[desktopPath] = createIconUpdater(desktopPath);
         });
     }
 
-    for (auto iconPack : IconPackFactory::loadIconPacks()) {
-        if (iconPack->enabled()) {
-            iconPackUpdaters[iconPack] = iconPack->iconPackUpdater();
-        }
-        QObject::connect(iconPack, &IconPack::enabledChanged, [=]() {
-            iconPackAvailabilityChanged(iconPack);
-        });
-    }
+    for (auto icon : loadDynamicIcons())
+        dynamicIcons[icon->name()] = icon;
+
+    for (auto iconPack : IconPackFactory::loadIconPacks())
+        iconPacks[iconPack->name()] = iconPack;
+
+    rebuildIconUpdaters();
 
     return app.exec();
 }

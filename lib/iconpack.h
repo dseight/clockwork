@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QScopedPointer>
 
-class IconPackUpdater;
+class IconUpdater;
 class IconPackPrivate;
 
 class CLOCKWORK_EXPORT IconPack : public QObject
@@ -50,8 +50,9 @@ public:
      * whether provided application is native or Android. */
     QString iconByDesktopPath(const QString &desktopPath);
 
-    /* Updater for this icon pack. */
-    IconPackUpdater *iconPackUpdater();
+    /* Updater for specific application with icon from this pack.
+     * Returns nullptr if there is no icon with specified id. */
+    IconUpdater *iconUpdater(const QString &desktopPath, const QString &iconId);
 
 signals:
     void enabledChanged();

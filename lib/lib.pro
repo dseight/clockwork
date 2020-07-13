@@ -19,7 +19,6 @@ SOURCES += \
     harbourthemepack.cpp \
     iconpack.cpp \
     iconpackfactory.cpp \
-    iconpackupdater.cpp \
     iconprovider.cpp \
     iconupdater.cpp \
     svgiconrender.cpp
@@ -40,7 +39,6 @@ HEADERS += \
     iconpack.h \
     iconpack_p.h \
     iconpackfactory.h \
-    iconpackupdater.h \
     iconupdater_p.h
 
 target.path = $$[QT_INSTALL_LIBS]

@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QLibrary>
+#include <QUrl>
 
 namespace {
 
@@ -51,7 +52,7 @@ DynamicIconPrivate::DynamicIconPrivate(const QString &packageName,
     // for this application yet.
     const auto none = QStringLiteral("<none>");
     if (applicationProvider->value(none).toString() == none)
-        applicationProvider->set(name);
+        applicationProvider->set(QStringLiteral("dynamic-icon://") + name);
 
     connect(applicationProvider, &MGConfItem::valueChanged, parent, &DynamicIcon::enabledChanged);
 }
@@ -84,12 +85,14 @@ bool DynamicIcon::available()
 
 bool DynamicIcon::enabled()
 {
-    return d_ptr->applicationProvider->value().toString() == name();
+    QUrl uri(d_ptr->applicationProvider->value().toString());
+    return uri.scheme() == QStringLiteral("dynamic-icon") && uri.host() == name();
 }
 
 void DynamicIcon::setEnabled(bool enabled)
 {
-    d_ptr->applicationProvider->set(enabled ? name() : QString());
+    const auto providerUri = QStringLiteral("dynamic-icon://") + name();
+    d_ptr->applicationProvider->set(enabled ? providerUri : QString());
 }
 
 IconProvider *DynamicIcon::iconProvider()

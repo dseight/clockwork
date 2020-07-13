@@ -1,6 +1,7 @@
 #include "iconpack.h"
 #include "iconpack_p.h"
-#include "iconpackupdater.h"
+#include "iconprovider.h"
+#include "iconupdater.h"
 #include "svgiconrender.h"
 #include <MDesktopEntry>
 #include <MGConfItem>
@@ -12,6 +13,28 @@
 #include <QPainter>
 
 namespace {
+
+class IconPackIconProvider : public IconProvider
+{
+    Q_OBJECT
+
+public:
+    IconPackIconProvider(IconPack *iconPack, const QString &iconId)
+        : IconProvider(iconPack)
+        , m_iconPack(iconPack)
+        , m_iconId(iconId)
+    {
+    }
+
+    QImage requestImage(const QSize &requestedSize) override
+    {
+        return m_iconPack->requestIcon(m_iconId, requestedSize);
+    }
+
+private:
+    IconPack *m_iconPack;
+    QString m_iconId;
+};
 
 MGConfItem *currentIconPackConf()
 {
@@ -65,9 +88,11 @@ QString IconPack::iconByDesktopPath(const QString &desktopPath)
     }
 }
 
-IconPackUpdater *IconPack::iconPackUpdater()
+IconUpdater *IconPack::iconUpdater(const QString &desktopPath, const QString &iconId)
 {
-    return new IconPackUpdater(this);
+    // TODO: return nullptr if updater is requested for non-existing iconId
+    auto provider = new IconPackIconProvider(this, iconId);
+    return new IconUpdater(provider, desktopPath, this);
 }
 
 QImage IconPack::loadImageFromFile(const QString &path, const QSize &requestedSize)
@@ -90,3 +115,5 @@ QImage IconPack::loadImageFromFile(const QString &path, const QSize &requestedSi
         return QImage(path);
     }
 }
+
+#include "iconpack.moc"
