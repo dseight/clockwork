@@ -8,15 +8,27 @@
 
 namespace {
 
-QString findIcon(const QString &basePath,
-                 const QString &iconName,
-                 const QString &primaryScheme,
-                 const QString &subPath)
+void loadIconsFromPath(const QString &path, const QString &scheme, QHash<QString, QString> &icons)
 {
-    auto primaryPath = basePath + primaryScheme + subPath + "/" + iconName + ".png";
+    QDir dir(path);
+    auto entries = dir.entryInfoList({"*.png"}, QDir::Files);
+
+    for (const auto &entry : entries) {
+        if (!icons.contains(entry.completeBaseName())) {
+            icons[entry.completeBaseName()] = scheme;
+        }
+    }
+}
+
+void loadIcons(const QString &basePath,
+               const QString &primaryScheme,
+               const QString &subPath,
+               QHash<QString, QString> &icons)
+{
+    const auto primaryPath = basePath + primaryScheme + subPath;
 
     if (QFile::exists(primaryPath))
-        return primaryPath;
+        loadIconsFromPath(primaryPath, primaryScheme, icons);
 
     QDir dir(basePath);
     auto entries = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
@@ -28,15 +40,8 @@ QString findIcon(const QString &basePath,
         return collator.compare(s1, s2) > 0;
     });
 
-    for (const auto &entry : entries) {
-        auto path = dir.absoluteFilePath(entry) + subPath + "/" + iconName + ".png";
-
-        if (QFile::exists(path))
-            return path;
-    }
-
-    qDebug() << "No icon with name" << iconName << "found";
-    return {};
+    for (const auto &entry : entries)
+        loadIconsFromPath(dir.absoluteFilePath(entry) + subPath, entry, icons);
 }
 
 } // namespace
@@ -53,14 +58,18 @@ HarbourThemePack::HarbourThemePack(const QString &path, QObject *parent)
     }
 
     const auto pixelRatio = Silica::Theme::instance()->pixelRatio();
-    m_scale = "z" + QString::number(pixelRatio, 'f', 2);
+    auto scale = "z" + QString::number(pixelRatio, 'f', 2);
 
     // z1.00 must be truncated to z1.0
-    if (m_scale.endsWith('0'))
-        m_scale.chop(1);
+    if (scale.endsWith('0'))
+        scale.chop(1);
 
     const auto iconSize = Silica::Theme::instance()->iconSizeLauncher();
-    m_size = QStringLiteral("%1x%1").arg(QString::number(iconSize, 'f', 0));
+    const auto size = QStringLiteral("%1x%1").arg(QString::number(iconSize, 'f', 0));
+
+    loadIcons(m_path + "/jolla/", scale, "/icons", m_jollaIcons);
+    loadIcons(m_path + "/native/", size, "/apps", m_nativeIcons);
+    loadIcons(m_path + "/apk/", size, QString(), m_apkIcons);
 
     static const QStringList suggestedPreviewIcons = {
         "icon-launcher-messaging",
@@ -77,8 +86,7 @@ HarbourThemePack::HarbourThemePack(const QString &path, QObject *parent)
         if (iconPath.isEmpty())
             continue;
 
-        const auto iconId = QDir(m_path).relativeFilePath(iconPath);
-        m_previewIcons.append(iconId);
+        m_previewIcons.append(iconPath);
     }
 }
 
@@ -89,7 +97,18 @@ QString HarbourThemePack::displayName()
 
 QStringList HarbourThemePack::icons()
 {
-    return {};
+    QStringList icons;
+
+    for (const auto &iconName : m_jollaIcons.keys())
+        icons += findJollaIcon(iconName);
+
+    for (const auto &iconName : m_nativeIcons.keys())
+        icons += findNativeIcon(iconName);
+
+    for (const auto &iconName : m_apkIcons.keys())
+        icons += findApkIcon(iconName);
+
+    return icons;
 }
 
 QStringList HarbourThemePack::previewIcons()
@@ -128,15 +147,14 @@ QString HarbourThemePack::iconByPackageName(const QString &packageName)
         path = findNativeIcon(packageName);
     }
 
-    return QDir(m_path).relativeFilePath(path);
+    return path;
 }
 
 QString HarbourThemePack::iconByActivity(const QString &activity)
 {
     const auto normalized = QString(activity).replace('.', "_").replace('/', "-");
     const auto iconName = "apkd_launcher_" + normalized;
-    const auto path = findApkIcon(iconName);
-    return QDir(m_path).relativeFilePath(path);
+    return findApkIcon(iconName);
 }
 
 QImage HarbourThemePack::requestIcon(const QString &iconId, const QSize &requestedSize)
@@ -175,15 +193,30 @@ QList<IconPack *> HarbourThemePack::loadAll()
 
 QString HarbourThemePack::findJollaIcon(const QString &iconName)
 {
-    return findIcon(m_path + "/jolla/", iconName, m_scale, "/icons");
+    const auto scale = m_jollaIcons[iconName];
+
+    if (scale.isEmpty())
+        return {};
+
+    return "jolla/" + scale + "/icons/" + iconName + ".png";
 }
 
 QString HarbourThemePack::findNativeIcon(const QString &iconName)
 {
-    return findIcon(m_path + "/native/", iconName, m_size, "/apps");
+    const auto size = m_nativeIcons[iconName];
+
+    if (size.isEmpty())
+        return {};
+
+    return "native/" + size + "/apps/" + iconName + ".png";
 }
 
 QString HarbourThemePack::findApkIcon(const QString &iconName)
 {
-    return findIcon(m_path + "/apk/", iconName, m_size, QString());
+    const auto size = m_apkIcons[iconName];
+
+    if (size.isEmpty())
+        return {};
+
+    return "apk/" + size + "/" + iconName + ".png";
 }

@@ -2,6 +2,7 @@
 #define HARBOURTHEMEPACK_H
 
 #include "iconpack.h"
+#include <QHash>
 
 class HarbourThemePack : public IconPack
 {
@@ -25,9 +26,12 @@ private:
 private:
     QString m_path;
     QString m_displayName;
-    QString m_scale;
-    QString m_size;
     QStringList m_previewIcons;
+
+    // Icon name -> scale/size mappings (e.g. "icon-launcher-shell" -> "z1.75")
+    QHash<QString, QString> m_jollaIcons;
+    QHash<QString, QString> m_nativeIcons;
+    QHash<QString, QString> m_apkIcons;
 };
 
 #endif // HARBOURTHEMEPACK_H
