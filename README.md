@@ -16,6 +16,15 @@ to dynamically update icon for *any* application. Default dynamic icon plugin
 supports updating of Clock and Calendar icons.
 
 
+## Screenshots
+
+<p float="left">
+    <img src="screenshots/screenshot-1.png" alt="Settings" height="400">
+    <img src="screenshots/screenshot-2.png" alt="Main Page" height="400">
+    <img src="screenshots/screenshot-3.png" alt="Icon Pack Preview" height="400">
+</p>
+
+
 ## Contributing
 
 Stick to [Sailfish OS Coding Conventions] when writing new code.
