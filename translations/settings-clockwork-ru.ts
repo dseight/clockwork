@@ -45,5 +45,17 @@
         <extracomment>%1 is the icon pack name</extracomment>
         <translation>Использовать %1?</translation>
     </message>
+    <message id="settings_clockwork-customize_icons_hint">
+        <source>You can choose icon for application from any installed pack.</source>
+        <translation>Для приложений можно выбрать иконку из любого имеющегося набора.</translation>
+    </message>
+    <message id="settings_clockwork-customize_icons">
+        <source>Customize icons</source>
+        <translation>Персонализировать иконки</translation>
+    </message>
+    <message id="settings_clockwork-default_icon">
+        <source>Default icon</source>
+        <translation>Иконка по умолчанию</translation>
+    </message>
 </context>
 </TS>
