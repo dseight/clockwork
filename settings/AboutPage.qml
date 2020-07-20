@@ -32,6 +32,7 @@ Page {
                 bottomPadding: Theme.paddingMedium
                 color: Theme.highlightColor
                 text: "Clockwork " + clockworkPluginVersion
+                wrapMode: Text.Wrap
             }
 
             Label {
