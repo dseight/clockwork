@@ -50,12 +50,6 @@ protected:
     /* Override this with custom icon provider class. */
     virtual IconProvider *iconProvider(QObject *parent) = 0;
 
-    /* Override this with custom icon updater class.
-     * Generic IconUpdater is used by default. */
-    virtual IconUpdater *iconUpdater(IconProvider *provider,
-                                     const QString &desktopPath,
-                                     QObject *parent);
-
 signals:
     void availableChanged();
     void enabledChanged();

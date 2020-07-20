@@ -35,6 +35,7 @@ DynamicIconPrivate::DynamicIconPrivate(const QString &packageName,
                                        const QString &name,
                                        DynamicIcon *parent)
     : QObject(parent)
+    , iconProvider(nullptr)
     , name(name)
     , packageName(packageName)
 {
@@ -97,19 +98,15 @@ void DynamicIcon::setEnabled(bool enabled)
 
 IconProvider *DynamicIcon::iconProvider()
 {
-    return iconProvider(this);
+    if (d_ptr->iconProvider == nullptr)
+        d_ptr->iconProvider = iconProvider(this);
+
+    return d_ptr->iconProvider;
 }
 
 IconUpdater *DynamicIcon::iconUpdater()
 {
-    return iconUpdater(iconProvider(), d_ptr->desktopPath, this);
-}
-
-IconUpdater *DynamicIcon::iconUpdater(IconProvider *provider,
-                                      const QString &desktopPath,
-                                      QObject *parent)
-{
-    return new IconUpdater(provider, desktopPath, parent);
+    return new IconUpdater(iconProvider(), d_ptr->desktopPath, this);
 }
 
 void registerDynamicIconMeta(const QMetaObject &meta)

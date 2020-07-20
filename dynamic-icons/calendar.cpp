@@ -1,6 +1,5 @@
 #include "dynamicicon.h"
 #include "iconprovider.h"
-#include "iconupdater.h"
 #include "svgiconrender.h"
 #include <QDate>
 #include <QDebug>
@@ -15,6 +14,11 @@ public:
     CalendarIconProvider(QObject *parent)
         : IconProvider(parent)
     {
+        connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
+
+        // Update icon each hour
+        m_timer.start(60 * 60 * 1000);
+
         QFile file(QStringLiteral(ASSETS_PATH "/icon-launcher-calendar.svg"));
 
         if (!file.open(QIODevice::ReadOnly)) {
@@ -48,25 +52,7 @@ private:
 
 private:
     QByteArray m_asset;
-};
-
-class CalendarIconUpdater : public IconUpdater
-{
-    Q_OBJECT
-
-public:
-    CalendarIconUpdater(IconProvider *provider, const QString &desktopPath, QObject *parent)
-        : IconUpdater(provider, desktopPath, parent)
-        , m_timer(new QTimer(this))
-    {
-        connect(m_timer, &QTimer::timeout, this, &CalendarIconUpdater::update);
-
-        // Update icon each hour
-        m_timer->start(60 * 60 * 1000);
-    }
-
-private:
-    QTimer *m_timer;
+    QTimer m_timer;
 };
 
 class CalendarDynamicIcon : public DynamicIcon
@@ -86,13 +72,6 @@ protected:
     IconProvider *iconProvider(QObject *parent) override
     {
         return new CalendarIconProvider(parent);
-    }
-
-    IconUpdater *iconUpdater(IconProvider *provider,
-                             const QString &desktopPath,
-                             QObject *parent) override
-    {
-        return new CalendarIconUpdater(provider, desktopPath, parent);
     }
 };
 

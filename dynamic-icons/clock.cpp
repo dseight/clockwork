@@ -1,6 +1,5 @@
 #include "dynamicicon.h"
 #include "iconprovider.h"
-#include "iconupdater.h"
 #include "svgiconrender.h"
 #include <QDebug>
 #include <QFile>
@@ -15,6 +14,13 @@ public:
     ClockIconProvider(QObject *parent)
         : IconProvider(parent)
     {
+        connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
+
+        // Update icon each minute
+        // TODO: use timed as source of update events, look at
+        // nemo-qml-plugin-time-qt5 implementation
+        m_timer.start(60 * 1000);
+
         // TODO: add dark icon variant and make it possible for user to
         // choose icon variant from settings
         QFile file(QStringLiteral(ASSETS_PATH "/icon-launcher-clock.svg"));
@@ -63,28 +69,7 @@ private:
 
 private:
     QByteArray m_asset;
-};
-
-class ClockIconUpdater : public IconUpdater
-{
-    Q_OBJECT
-
-public:
-    ClockIconUpdater(IconProvider *provider, const QString &desktopPath, QObject *parent)
-        : IconUpdater(provider, desktopPath, parent)
-        , m_timer(new QTimer(this))
-    {
-        connect(m_timer, &QTimer::timeout, this, &ClockIconUpdater::update);
-
-        // Update icon each minute
-        m_timer->start(60 * 1000);
-
-        // TODO: use timed as source of update events, look at
-        // nemo-qml-plugin-time-qt5 implementation
-    }
-
-private:
-    QTimer *m_timer;
+    QTimer m_timer;
 };
 
 class ClockDynamicIcon : public DynamicIcon
@@ -102,13 +87,6 @@ protected:
     IconProvider *iconProvider(QObject *parent) override
     {
         return new ClockIconProvider(parent);
-    }
-
-    IconUpdater *iconUpdater(IconProvider *provider,
-                             const QString &desktopPath,
-                             QObject *parent) override
-    {
-        return new ClockIconUpdater(provider, desktopPath, parent);
     }
 };
 

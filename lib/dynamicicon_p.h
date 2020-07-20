@@ -5,6 +5,7 @@
 #include <QObject>
 
 class DynamicIcon;
+class IconProvider;
 class MGConfItem;
 
 class DynamicIconPrivate : public QObject
@@ -14,6 +15,7 @@ class DynamicIconPrivate : public QObject
 public:
     DynamicIconPrivate(const QString &packageName, const QString &name, DynamicIcon *parent);
 
+    IconProvider *iconProvider;
     QString name;
     QString packageName;
     QString displayName;
