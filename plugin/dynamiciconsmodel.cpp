@@ -1,6 +1,8 @@
 #include "dynamiciconsmodel.h"
 #include "dynamicicon.h"
 #include "dynamicicon_p.h"
+#include "iconprovider.h"
+#include <QDateTime>
 
 DynamicIconsModel::DynamicIconsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -13,6 +15,12 @@ DynamicIconsModel::DynamicIconsModel(QObject *parent)
             const auto row = m_icons.indexOf(icon);
             const auto index = createIndex(row, 0);
             emit dataChanged(index, index, {EnabledRole});
+        });
+
+        connect(icon->iconProvider(), &IconProvider::imageUpdated, this, [=]() {
+            const auto row = m_icons.indexOf(icon);
+            const auto index = createIndex(row, 0);
+            emit dataChanged(index, index, {IconSourceRole});
         });
     }
 }
@@ -35,7 +43,8 @@ QVariant DynamicIconsModel::data(const QModelIndex &index, int role) const
     case NameRole:
         return icon->name();
     case IconSourceRole:
-        return QStringLiteral("image://clockwork/dynamic-icon/%1").arg(icon->name());
+        return QStringLiteral("image://clockwork/dynamic-icon/%1?t=%2")
+            .arg(icon->name(), QString::number(QDateTime::currentMSecsSinceEpoch()));
     case AvailableRole:
         return icon->available();
     case EnabledRole:

@@ -279,6 +279,7 @@ IconUpdater::IconUpdater(IconProvider *provider, const QString &desktopPath, QOb
     : QObject(parent)
     , d_ptr(new IconUpdaterPrivate(provider, desktopPath))
 {
+    connect(provider, &IconProvider::imageUpdated, this, &IconUpdater::update);
     update();
 }
 

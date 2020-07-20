@@ -5,6 +5,7 @@
 #include "iconpackfactory.h"
 #include "iconprovider.h"
 #include <QDebug>
+#include <QRegularExpression>
 
 ClockworkImageProvider::ClockworkImageProvider()
     : QQuickImageProvider(QQmlImageProviderBase::Image)
@@ -45,10 +46,13 @@ QImage ClockworkImageProvider::requestImage(const QString &id,
 
 QImage ClockworkImageProvider::dynamicIcon(const QString &path, const QSize &requestedSize)
 {
-    if (!m_dynamicIconProviders.contains(path))
+    QString name(path);
+    name.remove(QRegularExpression("\\?.*"));
+
+    if (!m_dynamicIconProviders.contains(name))
         return {};
 
-    const auto provider = m_dynamicIconProviders.value(path);
+    const auto provider = m_dynamicIconProviders.value(name);
     return provider->requestImage(requestedSize);
 }
 
