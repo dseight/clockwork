@@ -256,11 +256,18 @@ void IconUpdaterPrivate::restoreThemeIcon()
     DesktopEntry desktop(desktopPath);
 
     const auto currentIconPath = desktop.icon();
+    const auto isOurIconPath = currentIconPath.startsWith("/usr/share/clockwork");
+
+    if (!isOurIconPath) {
+        qDebug() << "Desktop file" << desktopPath
+                 << "was updated or removed, no need to restore theme icon";
+        return;
+    }
 
     desktop.setIcon(iconPath);
     desktop.save();
 
-    if (currentIconPath.startsWith("/usr/share/clockwork")) {
+    if (isOurIconPath) {
         QFile icon(currentIconPath);
         icon.remove();
     }
