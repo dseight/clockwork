@@ -4,6 +4,8 @@ TARGET = default-dynamic-icons
 CONFIG += c++14
 CONFIG += plugin
 CONFIG += no_plugin_name_prefix
+CONFIG += link_pkgconfig
+PKGCONFIG += mlite5
 
 INCLUDEPATH += ../lib
 LIBS += -L../lib -lclockwork
