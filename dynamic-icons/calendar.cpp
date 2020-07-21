@@ -1,24 +1,28 @@
 #include "dynamicicon.h"
+#include "iconpack.h"
+#include "iconpackfactory.h"
 #include "iconprovider.h"
 #include "svgiconrender.h"
+#include <MGConfItem>
 #include <QDate>
 #include <QDebug>
 #include <QFile>
 #include <QTimer>
 
-class CalendarIconProvider : public IconProvider
+namespace {
+
+class CalendarIconRenderer
 {
-    Q_OBJECT
-
 public:
-    explicit CalendarIconProvider(QObject *parent)
-        : IconProvider(parent)
+    virtual ~CalendarIconRenderer() = default;
+    virtual QImage requestImage(const QDate &date, const QSize &requestedSize) = 0;
+};
+
+class DefaultCalendarIconRenderer : public CalendarIconRenderer
+{
+public:
+    DefaultCalendarIconRenderer()
     {
-        connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
-
-        // Update icon each hour
-        m_timer.start(60 * 60 * 1000);
-
         QFile file(QStringLiteral(ASSETS_PATH "/icon-launcher-calendar.svg"));
 
         if (!file.open(QIODevice::ReadOnly)) {
@@ -29,20 +33,15 @@ public:
         m_asset = file.readAll();
     }
 
-    QImage requestImage(const QSize &requestedSize) override
+    QImage requestImage(const QDate &date, const QSize &requestedSize) override
     {
-        return renderSvgIcon(getSvgData(), requestedSize);
+        return renderSvgIcon(getSvgData(date), requestedSize);
     }
 
 private:
-    QByteArray getSvgData()
+    QByteArray getSvgData(const QDate &date)
     {
-        // It might be better to parse DOM when more features will be added.
-        // But at current state it is just unnecessarily increases complexity.
-
         QByteArray asset(m_asset);
-
-        const auto date = QDate::currentDate();
         const auto day = ">" + QString::number(date.day()) + "<";
 
         asset.replace(">31<", day.toLatin1());
@@ -52,8 +51,84 @@ private:
 
 private:
     QByteArray m_asset;
-    QTimer m_timer;
 };
+
+class IconpackCalendarIconRenderer : public CalendarIconRenderer
+{
+public:
+    explicit IconpackCalendarIconRenderer(const QString &name)
+    {
+        const auto iconPacks = IconPackFactory::loadIconPacks();
+        for (auto iconPack : iconPacks) {
+            if (iconPack->name() == name) {
+                m_iconPack = iconPack;
+            }
+        }
+
+        if (m_iconPack == nullptr)
+            qDebug() << "No icon pack with name" << name
+                     << "found. Dynamic calendar icon will not work.";
+    }
+
+    QImage requestImage(const QDate &date, const QSize &requestedSize) override
+    {
+        if (!m_iconPack)
+            return {};
+
+        return m_iconPack->requestCalendarIcon(date, requestedSize);
+    }
+
+private:
+    IconPack *m_iconPack;
+};
+
+class CalendarIconProvider : public IconProvider
+{
+    Q_OBJECT
+
+public:
+    explicit CalendarIconProvider(QObject *parent)
+        : IconProvider(parent)
+        // TODO: move currentIconPackConf to some common place
+        , m_currentIconPackConf(QStringLiteral("/com/dseight/clockwork/icon-pack"))
+    {
+        updateRenderer();
+
+        connect(&m_currentIconPackConf, &MGConfItem::valueChanged,
+                this, &CalendarIconProvider::updateRenderer);
+        connect(&m_currentIconPackConf, &MGConfItem::valueChanged,
+                this, &IconProvider::imageUpdated);
+        connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
+
+        // Update icon each hour
+        m_timer.start(60 * 60 * 1000);
+    }
+
+    QImage requestImage(const QSize &requestedSize) override
+    {
+        const auto date = QDate::currentDate();
+        return m_renderer->requestImage(date, requestedSize);
+    }
+
+private slots:
+    void updateRenderer()
+    {
+        const auto iconPackName = m_currentIconPackConf.value().toString();
+
+        if (iconPackName.isEmpty()) {
+            m_renderer.reset(new DefaultCalendarIconRenderer);
+        } else {
+            m_renderer.reset(new IconpackCalendarIconRenderer(iconPackName));
+        }
+    }
+
+private:
+    QTimer m_timer;
+    MGConfItem m_currentIconPackConf;
+    QScopedPointer<CalendarIconRenderer> m_renderer;
+};
+
+} // namespace
 
 class CalendarDynamicIcon : public DynamicIcon
 {
