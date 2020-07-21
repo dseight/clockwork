@@ -266,11 +266,7 @@ void IconUpdaterPrivate::restoreThemeIcon()
 
     desktop.setIcon(iconPath);
     desktop.save();
-
-    if (isOurIconPath) {
-        QFile icon(currentIconPath);
-        icon.remove();
-    }
+    QFile::remove(currentIconPath);
 
     qDebug() << "Restored theme icon for" << desktopPath;
 }
