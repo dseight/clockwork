@@ -88,6 +88,22 @@ HarbourThemePack::HarbourThemePack(const QString &path, QObject *parent)
 
         m_previewIcons.append(iconPath);
     }
+
+    QHash<QString, QString> clockIcons;
+    loadIcons(m_path + "/dynclock/", size, QString(), clockIcons);
+
+    m_clockDial = clockIcons["bg"];
+    m_hoursHand = clockIcons["hour"];
+    m_minutesHand = clockIcons["minute"];
+
+    m_hasDynamicClockIcon = !m_clockDial.isEmpty() && !m_hoursHand.isEmpty()
+                            && !m_minutesHand.isEmpty();
+
+    if (m_hasDynamicClockIcon) {
+        m_clockDial = "dynclock/" + m_clockDial + "/bg.png";
+        m_hoursHand = "dynclock/" + m_hoursHand + "/hour.png";
+        m_minutesHand = "dynclock/" + m_minutesHand + "/minute.png";
+    }
 }
 
 QString HarbourThemePack::displayName()
@@ -160,6 +176,30 @@ QString HarbourThemePack::iconByActivity(const QString &activity)
 QImage HarbourThemePack::requestIcon(const QString &iconId, const QSize &requestedSize)
 {
     return loadImageFromFile(m_path + "/" + iconId, requestedSize);
+}
+
+QImage HarbourThemePack::requestClockDialIcon(const QSize &requestedSize)
+{
+    if (!m_hasDynamicClockIcon)
+        return requestIcon(findJollaIcon("icon-launcher-clock"), requestedSize);
+
+    return requestIcon(m_clockDial, requestedSize);
+}
+
+QImage HarbourThemePack::requestHoursHandIcon(const QSize &requestedSize)
+{
+    if (!m_hasDynamicClockIcon)
+        return {};
+
+    return requestIcon(m_hoursHand, requestedSize);
+}
+
+QImage HarbourThemePack::requestMinutesHandIcon(const QSize &requestedSize)
+{
+    if (!m_hasDynamicClockIcon)
+        return {};
+
+    return requestIcon(m_minutesHand, requestedSize);
 }
 
 QList<IconPack *> HarbourThemePack::loadAll()

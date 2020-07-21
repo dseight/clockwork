@@ -40,6 +40,11 @@ public:
     /* Get icon with specified id and size. */
     virtual QImage requestIcon(const QString &iconId, const QSize &requestedSize) = 0;
 
+    /* Get parts of dynamic clock icon. */
+    virtual QImage requestClockDialIcon(const QSize &requestedSize) = 0;
+    virtual QImage requestHoursHandIcon(const QSize &requestedSize) = 0;
+    virtual QImage requestMinutesHandIcon(const QSize &requestedSize) = 0;
+
     /* If icon pack enabled, it will be applied on daemon launch. */
     bool enabled() const;
 
