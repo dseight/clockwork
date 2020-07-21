@@ -128,7 +128,7 @@ QString resolveIconPath(const QString &iconId)
         return iconId;
 
     Silica::ThemeIconResolver iconResolver;
-    const auto resolvedPath = iconResolver.resolvePath(iconId);
+    auto resolvedPath = iconResolver.resolvePath(iconId);
 
     // First try to use icon with proper scale, because ThemeIconResolver
     // returns 86x86 icon for third-party apps

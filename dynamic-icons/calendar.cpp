@@ -11,7 +11,7 @@ class CalendarIconProvider : public IconProvider
     Q_OBJECT
 
 public:
-    CalendarIconProvider(QObject *parent)
+    explicit CalendarIconProvider(QObject *parent)
         : IconProvider(parent)
     {
         connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
@@ -61,7 +61,7 @@ class CalendarDynamicIcon : public DynamicIcon
 
 public:
     Q_INVOKABLE
-    CalendarDynamicIcon(QObject *parent = nullptr)
+    explicit CalendarDynamicIcon(QObject *parent = nullptr)
         : DynamicIcon(QStringLiteral("jolla-calendar"),
                       QStringLiteral("clockwork-jolla-calendar"),
                       parent)

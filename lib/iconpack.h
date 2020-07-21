@@ -65,7 +65,7 @@ signals:
 protected:
     /* Load icon (either .png or .svg) from specified file, and scale it
      * to requested size. */
-    QImage loadImageFromFile(const QString &path, const QSize &requestedSize);
+    static QImage loadImageFromFile(const QString &path, const QSize &requestedSize);
 
 private:
     QScopedPointer<IconPackPrivate> d_ptr;

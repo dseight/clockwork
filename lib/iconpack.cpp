@@ -39,7 +39,7 @@ private:
 MGConfItem *currentIconPackConf()
 {
     static const auto path = QStringLiteral("/com/dseight/clockwork/icon-pack");
-    static MGConfItem *conf = new MGConfItem(path);
+    static auto *conf = new MGConfItem(path);
     return conf;
 }
 

@@ -124,7 +124,7 @@ class ClockIconProvider : public IconProvider
     Q_OBJECT
 
 public:
-    ClockIconProvider(QObject *parent)
+    explicit ClockIconProvider(QObject *parent)
         : IconProvider(parent)
         // TODO: move currentIconPackConf to some common place
         , m_currentIconPackConf(QStringLiteral("/com/dseight/clockwork/icon-pack"))
@@ -162,13 +162,13 @@ private slots:
     }
 
 private:
-    int hoursAngle(const QTime &time)
+    static int hoursAngle(const QTime &time)
     {
         const auto minutes = (time.hour() % 12) * 60 + time.minute();
         return 360 * minutes / (12 * 60);
     }
 
-    int minutesAngle(const QTime &time)
+    static int minutesAngle(const QTime &time)
     {
         return 360 * time.minute() / 60;
     }
@@ -187,7 +187,7 @@ class ClockDynamicIcon : public DynamicIcon
 
 public:
     Q_INVOKABLE
-    ClockDynamicIcon(QObject *parent = nullptr)
+    explicit ClockDynamicIcon(QObject *parent = nullptr)
         : DynamicIcon(QStringLiteral("jolla-clock"), QStringLiteral("clockwork-jolla-clock"), parent)
     {
     }

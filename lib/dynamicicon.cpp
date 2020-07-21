@@ -114,7 +114,7 @@ void registerDynamicIconMeta(const QMetaObject &meta)
     dynamicIconsMeta.append(meta);
 }
 
-const QList<DynamicIcon *> loadDynamicIcons()
+QList<DynamicIcon *> loadDynamicIcons()
 {
     static QMap<QString, DynamicIcon *> dynamicIcons;
 

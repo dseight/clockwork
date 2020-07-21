@@ -23,6 +23,6 @@ public:
     MGConfItem *applicationProvider;
 };
 
-CLOCKWORK_EXPORT const QList<DynamicIcon *> loadDynamicIcons();
+CLOCKWORK_EXPORT QList<DynamicIcon *> loadDynamicIcons();
 
 #endif // DYNAMICICON_P_H
