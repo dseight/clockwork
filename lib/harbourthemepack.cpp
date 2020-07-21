@@ -104,6 +104,19 @@ HarbourThemePack::HarbourThemePack(const QString &path, QObject *parent)
         m_hoursHand = "dynclock/" + m_hoursHand + "/hour.png";
         m_minutesHand = "dynclock/" + m_minutesHand + "/minute.png";
     }
+
+    QHash<QString, QString> calendarIcons;
+    loadIcons(m_path + "/dyncal/", size, QString(), calendarIcons);
+
+    m_hasDynamicCalendarIcon = calendarIcons.size() >= 31;
+
+    if (m_hasDynamicCalendarIcon) {
+        for (int i = 0; i < 31; ++i) {
+            const auto day = QString::number(i + 1);
+            const auto size = calendarIcons[day];
+            m_calendarIcons[i] = "dyncal/" + size + "/" + day + ".png";
+        }
+    }
 }
 
 QString HarbourThemePack::displayName()
@@ -200,6 +213,14 @@ QImage HarbourThemePack::requestMinutesHandIcon(const QSize &requestedSize)
         return {};
 
     return requestIcon(m_minutesHand, requestedSize);
+}
+
+QImage HarbourThemePack::requestCalendarIcon(const QDate &date, const QSize &requestedSize)
+{
+    if (!m_hasDynamicCalendarIcon || !date.isValid())
+        return requestIcon(findJollaIcon("icon-launcher-calendar"), requestedSize);
+
+    return requestIcon(m_calendarIcons[date.day() - 1], requestedSize);
 }
 
 QList<IconPack *> HarbourThemePack::loadAll()

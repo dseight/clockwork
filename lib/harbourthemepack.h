@@ -18,6 +18,7 @@ public:
     QImage requestClockDialIcon(const QSize &requestedSize) override;
     QImage requestHoursHandIcon(const QSize &requestedSize) override;
     QImage requestMinutesHandIcon(const QSize &requestedSize) override;
+    QImage requestCalendarIcon(const QDate &date, const QSize &requestedSize) override;
 
     static QList<IconPack *> loadAll();
 
@@ -41,6 +42,10 @@ private:
     QString m_clockDial;
     QString m_hoursHand;
     QString m_minutesHand;
+
+    // Dynamic calendar icon
+    bool m_hasDynamicCalendarIcon;
+    QString m_calendarIcons[31];
 };
 
 #endif // HARBOURTHEMEPACK_H

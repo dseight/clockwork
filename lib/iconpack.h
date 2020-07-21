@@ -2,6 +2,7 @@
 #define ICONPACK_H
 
 #include "clockworkglobal.h"
+#include <QDate>
 #include <QObject>
 #include <QScopedPointer>
 
@@ -44,6 +45,9 @@ public:
     virtual QImage requestClockDialIcon(const QSize &requestedSize) = 0;
     virtual QImage requestHoursHandIcon(const QSize &requestedSize) = 0;
     virtual QImage requestMinutesHandIcon(const QSize &requestedSize) = 0;
+
+    /* Get calendar icon for specific date. */
+    virtual QImage requestCalendarIcon(const QDate &date, const QSize &requestedSize) = 0;
 
     /* If icon pack enabled, it will be applied on daemon launch. */
     bool enabled() const;
