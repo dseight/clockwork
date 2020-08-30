@@ -1,6 +1,8 @@
 TEMPLATE = lib
 TARGET = default-dynamic-icons
 
+QT += dbus
+
 CONFIG += c++14
 CONFIG += plugin
 CONFIG += no_plugin_name_prefix
@@ -15,7 +17,11 @@ DEFINES += ASSETS_PATH=\\\"$${ASSETS_PATH}\\\"
 
 SOURCES += \
     calendar.cpp \
-    clock.cpp
+    clock.cpp \
+    devicelockstatus.cpp
+
+HEADERS += \
+    devicelockstatus.h
 
 target.path = /usr/share/clockwork/dynamic-icons
 

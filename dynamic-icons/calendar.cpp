@@ -1,3 +1,4 @@
+#include "devicelockstatus.h"
 #include "dynamicicon.h"
 #include "iconpack.h"
 #include "iconpackfactory.h"
@@ -99,6 +100,7 @@ public:
         connect(&m_currentIconPackConf, &MGConfItem::valueChanged,
                 this, &IconProvider::imageUpdated);
         connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
+        connect(&m_devicelockStatus, &DevicelockStatus::unlocked, this, &IconProvider::imageUpdated);
 
         // Update icon each hour
         m_timer.start(60 * 60 * 1000);
@@ -124,6 +126,7 @@ private slots:
 
 private:
     QTimer m_timer;
+    DevicelockStatus m_devicelockStatus;
     MGConfItem m_currentIconPackConf;
     QScopedPointer<CalendarIconRenderer> m_renderer;
 };

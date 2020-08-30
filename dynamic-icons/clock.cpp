@@ -1,3 +1,4 @@
+#include "devicelockstatus.h"
 #include "dynamicicon.h"
 #include "iconpack.h"
 #include "iconpackfactory.h"
@@ -136,6 +137,7 @@ public:
         connect(&m_currentIconPackConf, &MGConfItem::valueChanged,
                 this, &IconProvider::imageUpdated);
         connect(&m_timer, &QTimer::timeout, this, &IconProvider::imageUpdated);
+        connect(&m_devicelockStatus, &DevicelockStatus::unlocked, this, &IconProvider::imageUpdated);
 
         // Update icon each minute
         // TODO: use timed as source of update events, look at
@@ -175,6 +177,7 @@ private:
 
 private:
     QTimer m_timer;
+    DevicelockStatus m_devicelockStatus;
     MGConfItem m_currentIconPackConf;
     QScopedPointer<ClockIconRenderer> m_renderer;
 };
