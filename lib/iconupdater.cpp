@@ -148,7 +148,12 @@ QString resolveIconPath(const QString &iconId)
 
 bool isThemeIcon(const QString &iconPath)
 {
-    return iconPath.startsWith("/usr/share/themes/") || iconPath.startsWith("/var/lib/apkd/");
+    return iconPath.startsWith("/usr/share/themes/")
+        || iconPath.startsWith("/var/lib/apkd/")
+        // Unexpected daemon close may lead to stale icon path in desktop file.
+        // As icon path replacement is used only for theme icons, it's defenitely
+        // an icon from theme.
+        || iconPath.startsWith("/usr/share/clockwork/");
 }
 
 } // namespace
