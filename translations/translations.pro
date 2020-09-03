@@ -2,6 +2,7 @@ TEMPLATE = aux
 
 TRANSLATIONS = \
     settings-clockwork-ru.ts \
+    settings-clockwork-zh_CN.ts \
     settings-clockwork.ts       # Default translation
 
 for(t, TRANSLATIONS) {
