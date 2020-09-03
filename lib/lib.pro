@@ -14,6 +14,7 @@ PKGCONFIG += glib-2.0
 DEFINES += CLOCKWORK_BUILD_LIBRARY
 
 SOURCES += \
+    aliendalvikwatcher.cpp \
     desktopentry.cpp \
     dynamicicon.cpp \
     harbourthemepack.cpp \
@@ -32,6 +33,7 @@ PUBLICHEADERS += \
 
 HEADERS += \
     $$PUBLICHEADERS \
+    aliendalvikwatcher.h \
     clockworkglobal_p.h \
     desktopentry.h \
     dynamicicon_p.h \

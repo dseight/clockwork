@@ -1,4 +1,5 @@
 #include "iconupdater.h"
+#include "aliendalvikwatcher.h"
 #include "desktopentry.h"
 #include "iconprovider.h"
 #include "iconupdater_p.h"
@@ -146,10 +147,15 @@ QString resolveIconPath(const QString &iconId)
     return resolvedPath;
 }
 
+bool isAlienDalvikIcon(const QString &iconPath)
+{
+    return iconPath.startsWith("/var/lib/apkd/");
+}
+
 bool isThemeIcon(const QString &iconPath)
 {
     return iconPath.startsWith("/usr/share/themes/")
-           || iconPath.startsWith("/var/lib/apkd/")
+           || isAlienDalvikIcon(iconPath)
            // Unexpected daemon close may lead to stale icon path in desktop file.
            // As icon path replacement is used only for theme icons, it's defenitely
            // an icon from theme.
@@ -165,6 +171,7 @@ IconUpdaterPrivate::IconUpdaterPrivate(IconProvider *provider, const QString &de
     MDesktopEntry desktopEntry(desktopPath);
     iconPath = resolveIconPath(desktopEntry.icon());
     themeIcon = isThemeIcon(iconPath);
+    alienDalvikIcon = isAlienDalvikIcon(iconPath);
 }
 
 void IconUpdaterPrivate::updateThirdPartyIcon()
@@ -281,6 +288,12 @@ IconUpdater::IconUpdater(IconProvider *provider, const QString &desktopPath, QOb
     , d_ptr(new IconUpdaterPrivate(provider, desktopPath))
 {
     connect(provider, &IconProvider::imageUpdated, this, &IconUpdater::update);
+
+    if (d_ptr->alienDalvikIcon) {
+        connect(AlienDalvikWatcher::instance(), &AlienDalvikWatcher::serviceStateChanged,
+                this, &IconUpdater::update);
+    }
+
     update();
 }
 

@@ -22,6 +22,7 @@ public:
     QString desktopPath;
     QString iconPath;
     bool themeIcon;
+    bool alienDalvikIcon;
 };
 
 #endif // ICONUPDATER_P_H
