@@ -41,9 +41,9 @@
         <translation>无可用图标包</translation>
     </message>
     <message id="settings_clockwork-use_some_icon_pack">
-        <source>是否使用 %1?</source>
+        <source>Use %1?</source>
         <extracomment>%1 is the icon pack name</extracomment>
-        <translation>图标包名称为 %1?</translation>
+        <translation>是否使用 %1?</translation>
     </message>
     <message id="settings_clockwork-customize_icons_hint">
         <source>You can choose icon for application from any installed pack.</source>
