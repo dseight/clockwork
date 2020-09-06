@@ -112,7 +112,7 @@ HarbourThemePack::HarbourThemePack(const QString &path, QObject *parent)
 
     if (m_hasDynamicCalendarIcon) {
         for (int i = 0; i < 31; ++i) {
-            const auto day = QString::number(i + 1);
+            const auto day = QString::number(i + 1).rightJustified(2, '0');
             const auto size = calendarIcons[day];
             m_calendarIcons[i] = "dyncal/" + size + "/" + day + ".png";
         }
