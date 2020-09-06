@@ -124,6 +124,8 @@ Page {
                     onClicked: pageStack.push("CustomizeIconsPage.qml")
                 }
             }
+
+            Item { width: 1; height: Theme.paddingLarge }
         }
     }
 
