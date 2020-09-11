@@ -14,6 +14,7 @@
 #include <QGuiApplication>
 #include <QHash>
 #include <QSocketNotifier>
+#include <QStandardPaths>
 #include <QUrl>
 
 namespace {
@@ -108,7 +109,16 @@ QUrl getProviderUri(const QString &desktopPath)
 QFileInfoList getDesktopEntriesInfoList()
 {
     QDir globalApplicationsDir(QStringLiteral("/usr/share/applications"));
-    return globalApplicationsDir.entryInfoList({"*.desktop"}, QDir::Files);
+
+    const auto userApplicationsPath = QStringLiteral("%1/applications")
+                                          .arg(QStandardPaths::writableLocation(
+                                              QStandardPaths::GenericDataLocation));
+    QDir userApplicationsDir(userApplicationsPath);
+
+    // FIXME: local desktop files must have higher priority than global, so if
+    // there are both global and local entry, global one must be excluded from list
+    return globalApplicationsDir.entryInfoList({"*.desktop"}, QDir::Files)
+           + userApplicationsDir.entryInfoList({"*.desktop"}, QDir::Files);
 }
 
 IconUpdater *createIconPackUpdater(const QString &name,
@@ -184,6 +194,9 @@ int main(int argc, char *argv[])
 
     // Watch for global icon changes
     QObject::connect(currentIconPackConf(), &MGConfItem::valueChanged, rebuildIconUpdaters);
+
+    // TODO: updaters must be rebuilt when new application is installed or when
+    // entries in ~/.local/share/applications are changed (e.g. by Flatpak Runner)
 
     // Watch for per-application icon changes
     const auto infoList = getDesktopEntriesInfoList();
