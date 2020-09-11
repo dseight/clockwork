@@ -8,6 +8,7 @@
 #include <silicatheme.h>
 #include <silicathemeiconresolver.h>
 #include <sys/stat.h>
+#include <QCollator>
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QDebug>
@@ -123,6 +124,37 @@ bool touchFile(const QString &path)
     return futimens(file.handle(), NULL) == 0;
 }
 
+QStringList findAcceptableSizePaths()
+{
+    const auto basePath = QStringLiteral("/usr/share/icons/hicolor/");
+    QDir dir(basePath);
+    auto entries = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+
+    // Sort naturally, e.g. 86x86 will be before 128x128
+    QCollator collator;
+    collator.setNumericMode(true);
+    std::sort(entries.begin(), entries.end(), [&](const QString &s1, const QString &s2) {
+        return collator.compare(s1, s2) < 0;
+    });
+
+    static QRegularExpression re("(\\d+)x\\d+");
+    const auto minIconSize = Silica::Theme::instance()->iconSizeLauncher();
+    QStringList paths;
+
+    for (const auto &entry : entries) {
+        const auto size = re.match(entry).captured(1);
+
+        if (size.isEmpty() || size.toInt() < minIconSize)
+            continue;
+
+        paths.append(basePath + entry + QStringLiteral("/apps/"));
+    }
+
+    // XXX: maybe it's worth to cache paths and update them only on changes
+    // in /usr/share/icons/hicolor directory?
+    return paths;
+}
+
 QString resolveIconPath(const QString &iconId)
 {
     // Using direct path to icon instead of ID
@@ -132,17 +164,19 @@ QString resolveIconPath(const QString &iconId)
     Silica::ThemeIconResolver iconResolver;
     auto resolvedPath = iconResolver.resolvePath(iconId);
 
-    // First try to use icon with proper scale, because ThemeIconResolver
-    // returns 86x86 icon for third-party apps
-    if (resolvedPath.contains("86x86")) {
-        const auto iconSize = Silica::Theme::instance()->iconSizeLauncher();
-        const auto size = QStringLiteral("%1x%1").arg(QString::number(iconSize, 'f', 0));
+    // ThemeIconResolver always returns 86x86 icon for third-party apps,
+    // but this is not the icon used in launcher. So, custom resolving
+    // should be used in this case.
+    if (resolvedPath.startsWith("/usr/share/icons/hicolor/86x86/apps/")) {
+        const auto fileName = QFileInfo(resolvedPath).fileName();
+        const auto paths = findAcceptableSizePaths();
 
-        QString scaledPath(resolvedPath);
-        scaledPath.replace("86x86", size);
+        for (const auto &path : paths) {
+            const auto iconPath = path + fileName;
 
-        if (QFile::exists(scaledPath))
-            return scaledPath;
+            if (QFile::exists(iconPath))
+                return iconPath;
+        }
     }
 
     return resolvedPath;
