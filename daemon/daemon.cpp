@@ -105,6 +105,12 @@ QUrl getProviderUri(const QString &desktopPath)
     return {};
 }
 
+QFileInfoList getDesktopEntriesInfoList()
+{
+    QDir globalApplicationsDir(QStringLiteral("/usr/share/applications"));
+    return globalApplicationsDir.entryInfoList({"*.desktop"}, QDir::Files);
+}
+
 IconUpdater *createIconPackUpdater(const QString &name,
                                    const QString &desktopPath,
                                    const QString &iconId = QString())
@@ -148,8 +154,7 @@ void rebuildIconUpdaters()
     for (auto updater : qAsConst(updaters))
         delete updater;
 
-    QDir dir(QStringLiteral("/usr/share/applications"));
-    const auto infoList = dir.entryInfoList({"*.desktop"}, QDir::Files);
+    const auto infoList = getDesktopEntriesInfoList();
     for (const auto &info : infoList) {
         const auto desktopPath = info.absoluteFilePath();
         MDesktopEntry desktopEntry(desktopPath);
@@ -181,8 +186,7 @@ int main(int argc, char *argv[])
     QObject::connect(currentIconPackConf(), &MGConfItem::valueChanged, rebuildIconUpdaters);
 
     // Watch for per-application icon changes
-    QDir dir(QStringLiteral("/usr/share/applications"));
-    const auto infoList = dir.entryInfoList({"*.desktop"}, QDir::Files);
+    const auto infoList = getDesktopEntriesInfoList();
     for (const auto &info : infoList) {
         const auto desktopPath = info.absoluteFilePath();
         QObject::connect(applicationConf(desktopPath), &MGConfItem::valueChanged, [=]() {
