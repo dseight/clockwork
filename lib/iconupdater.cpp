@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QFile>
 #include <QImage>
+#include <QRegularExpression>
 #include <QStandardPaths>
 
 namespace {
@@ -154,14 +155,8 @@ bool isAlienDalvikIcon(const QString &iconPath)
 
 bool isMonitoredIcon(const QString &iconPath)
 {
-    bool nonMonitored = iconPath.startsWith("/usr/share/themes/")
-                        || isAlienDalvikIcon(iconPath)
-                        // Unexpected daemon close may lead to stale icon path in
-                        // desktop file. As icon path replacement is used only for
-                        // non-monitored icons, it's defenitely an non-monitored one.
-                        || iconPath.startsWith("/usr/share/clockwork/");
-
-    return !nonMonitored;
+    static QRegularExpression re("/usr/share/icons/hicolor/\\w+/apps/.*");
+    return re.match(iconPath).hasMatch();
 }
 
 } // namespace
