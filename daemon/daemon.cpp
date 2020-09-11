@@ -81,7 +81,7 @@ MGConfItem *applicationConf(const QString &desktopPath)
 
     QFileInfo desktopInfo(desktopPath);
     const auto dconfPath = QStringLiteral("/com/dseight/clockwork/applications/%1/provider")
-                               .arg(desktopInfo.baseName());
+                               .arg(desktopInfo.completeBaseName());
 
     conf = new MGConfItem(dconfPath);
     applicationConfItems[desktopPath] = conf;

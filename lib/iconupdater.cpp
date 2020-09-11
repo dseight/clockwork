@@ -23,7 +23,7 @@ namespace {
 QString dconfIconBackupPath(const QString &desktopPath)
 {
     QFileInfo info(desktopPath);
-    return QStringLiteral("/com/dseight/clockwork/saved-id/%1").arg(info.baseName());
+    return QStringLiteral("/com/dseight/clockwork/saved-id/%1").arg(info.completeBaseName());
 }
 
 QString storedIconPath(const QString &desktopPath)
@@ -45,7 +45,8 @@ QString generateIconPath(const QString &desktopPath)
     // Timestamp appending will prevent Jolla Home from icon caching
     const auto currentSecs = QString::number(QDateTime::currentMSecsSinceEpoch() / 1000);
 
-    return QStringLiteral("/usr/share/clockwork/icons/%1-%2.png").arg(info.baseName(), currentSecs);
+    return QStringLiteral("/usr/share/clockwork/icons/%1-%2.png")
+        .arg(info.completeBaseName(), currentSecs);
 }
 
 QString normalizePath(const QString &path)

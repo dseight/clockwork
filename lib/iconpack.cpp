@@ -77,7 +77,7 @@ void IconPack::setEnabled(bool enabled)
 QString IconPack::iconByDesktopPath(const QString &desktopPath)
 {
     QFileInfo info(desktopPath);
-    const auto desktopBaseName = info.baseName();
+    const auto desktopBaseName = info.completeBaseName();
 
     if (desktopBaseName.startsWith("apkd_launcher")) {
         MDesktopEntry desktopEntry(desktopPath);

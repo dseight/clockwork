@@ -5,6 +5,12 @@ import com.jolla.settings 1.0
 import Nemo.Configuration 1.0
 
 Page {
+    function completeBaseName(filePath) {
+        var fileName = filePath.split('/').pop()
+        var to = fileName.lastIndexOf(".")
+        return to == -1 ? fileName : fileName.substr(0, to)
+    }
+
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: column.height
@@ -30,7 +36,7 @@ Page {
                     delegate: LauncherGridItem {
                         id: appItem
 
-                        readonly property string packageName: model.filePath.split('/').pop().split('.').shift()
+                        readonly property string packageName: completeBaseName(model.filePath)
                         readonly property bool customized: provider.value != ""
 
                         width: gridView.cellWidth
