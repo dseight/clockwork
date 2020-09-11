@@ -12,16 +12,16 @@ class IconUpdaterPrivate
 public:
     IconUpdaterPrivate(IconProvider *provider, const QString &desktopPath);
 
-    void updateThemeIcon();
-    void restoreThemeIcon();
+    void updateNonMonitoredIcon();
+    void restoreNonMonitoredIcon();
 
-    void updateThirdPartyIcon();
-    void restoreThirdPartyIcon();
+    void updateMonitoredIcon();
+    void restoreMonitoredIcon();
 
     IconProvider *provider;
     QString desktopPath;
     QString iconPath;
-    bool themeIcon;
+    bool monitoredIcon;
     bool alienDalvikIcon;
 };
 

@@ -152,14 +152,16 @@ bool isAlienDalvikIcon(const QString &iconPath)
     return iconPath.startsWith("/var/lib/apkd/");
 }
 
-bool isThemeIcon(const QString &iconPath)
+bool isMonitoredIcon(const QString &iconPath)
 {
-    return iconPath.startsWith("/usr/share/themes/")
-           || isAlienDalvikIcon(iconPath)
-           // Unexpected daemon close may lead to stale icon path in desktop file.
-           // As icon path replacement is used only for theme icons, it's defenitely
-           // an icon from theme.
-           || iconPath.startsWith("/usr/share/clockwork/");
+    bool nonMonitored = iconPath.startsWith("/usr/share/themes/")
+                        || isAlienDalvikIcon(iconPath)
+                        // Unexpected daemon close may lead to stale icon path in
+                        // desktop file. As icon path replacement is used only for
+                        // non-monitored icons, it's defenitely an non-monitored one.
+                        || iconPath.startsWith("/usr/share/clockwork/");
+
+    return !nonMonitored;
 }
 
 } // namespace
@@ -170,11 +172,11 @@ IconUpdaterPrivate::IconUpdaterPrivate(IconProvider *provider, const QString &de
 {
     MDesktopEntry desktopEntry(desktopPath);
     iconPath = resolveIconPath(desktopEntry.icon());
-    themeIcon = isThemeIcon(iconPath);
+    monitoredIcon = isMonitoredIcon(iconPath);
     alienDalvikIcon = isAlienDalvikIcon(iconPath);
 }
 
-void IconUpdaterPrivate::updateThirdPartyIcon()
+void IconUpdaterPrivate::updateMonitoredIcon()
 {
     if (iconPath.isEmpty()) {
         qWarning() << "Icon path for" << desktopPath << "is unresolved, ignoring update request";
@@ -207,7 +209,7 @@ void IconUpdaterPrivate::updateThirdPartyIcon()
     qDebug() << "Updated icon for" << desktopPath;
 }
 
-void IconUpdaterPrivate::restoreThirdPartyIcon()
+void IconUpdaterPrivate::restoreMonitoredIcon()
 {
     if (iconPath.isEmpty() || !isOurIcon(iconPath))
         return;
@@ -218,7 +220,7 @@ void IconUpdaterPrivate::restoreThirdPartyIcon()
     qDebug() << "Restored icon for" << desktopPath;
 }
 
-void IconUpdaterPrivate::updateThemeIcon()
+void IconUpdaterPrivate::updateNonMonitoredIcon()
 {
     DesktopEntry desktop(desktopPath);
 
@@ -256,10 +258,10 @@ void IconUpdaterPrivate::updateThemeIcon()
         icon.remove();
     }
 
-    qDebug() << "Updated theme icon for" << desktopPath;
+    qDebug() << "Updated non-monitored icon for" << desktopPath;
 }
 
-void IconUpdaterPrivate::restoreThemeIcon()
+void IconUpdaterPrivate::restoreNonMonitoredIcon()
 {
     const auto iconPath = storedIconPath(desktopPath);
     if (iconPath.isEmpty())
@@ -272,7 +274,7 @@ void IconUpdaterPrivate::restoreThemeIcon()
 
     if (!isOurIconPath) {
         qDebug() << "Desktop file" << desktopPath
-                 << "was updated or removed, no need to restore theme icon";
+                 << "was updated or removed, no need to restore non-monitored icon";
         return;
     }
 
@@ -280,7 +282,7 @@ void IconUpdaterPrivate::restoreThemeIcon()
     desktop.save();
     QFile::remove(currentIconPath);
 
-    qDebug() << "Restored theme icon for" << desktopPath;
+    qDebug() << "Restored non-monitored icon for" << desktopPath;
 }
 
 IconUpdater::IconUpdater(IconProvider *provider, const QString &desktopPath, QObject *parent)
@@ -299,18 +301,18 @@ IconUpdater::IconUpdater(IconProvider *provider, const QString &desktopPath, QOb
 
 IconUpdater::~IconUpdater()
 {
-    if (d_ptr->themeIcon) {
-        d_ptr->restoreThemeIcon();
+    if (d_ptr->monitoredIcon) {
+        d_ptr->restoreMonitoredIcon();
     } else {
-        d_ptr->restoreThirdPartyIcon();
+        d_ptr->restoreNonMonitoredIcon();
     }
 }
 
 void IconUpdater::update()
 {
-    if (d_ptr->themeIcon) {
-        d_ptr->updateThemeIcon();
+    if (d_ptr->monitoredIcon) {
+        d_ptr->updateMonitoredIcon();
     } else {
-        d_ptr->updateThirdPartyIcon();
+        d_ptr->updateNonMonitoredIcon();
     }
 }
