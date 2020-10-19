@@ -26,6 +26,7 @@ private:
     QString findJollaIcon(const QString &iconName);
     QString findNativeIcon(const QString &iconName);
     QString findApkIcon(const QString &iconName);
+    void loadPreviewIcons();
 
 private:
     QString m_path;

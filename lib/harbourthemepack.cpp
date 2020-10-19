@@ -1,4 +1,5 @@
 #include "harbourthemepack.h"
+#include "clockworkglobal_p.h"
 #include <silicatheme.h>
 #include <QCollator>
 #include <QDebug>
@@ -71,23 +72,7 @@ HarbourThemePack::HarbourThemePack(const QString &path, QObject *parent)
     loadIcons(m_path + "/native/", size, "/apps", m_nativeIcons);
     loadIcons(m_path + "/apk/", size, QString(), m_apkIcons);
 
-    static const QStringList suggestedPreviewIcons = {
-        "icon-launcher-messaging",
-        "icon-launcher-weather",
-        "icon-launcher-camera",
-        "icon-launcher-browser",
-        "icon-launcher-clock",
-        "icon-launcher-calendar",
-    };
-
-    for (const auto &iconName : suggestedPreviewIcons) {
-        const auto iconPath = findJollaIcon(iconName);
-
-        if (iconPath.isEmpty())
-            continue;
-
-        m_previewIcons.append(iconPath);
-    }
+    loadPreviewIcons();
 
     QHash<QString, QString> clockIcons;
     loadIcons(m_path + "/dynclock/", size, QString(), clockIcons);
@@ -280,4 +265,60 @@ QString HarbourThemePack::findApkIcon(const QString &iconName)
         return {};
 
     return "apk/" + size + "/" + iconName + ".png";
+}
+
+void HarbourThemePack::loadPreviewIcons()
+{
+    const int requiredPreviewsCount = 6;
+    static const QStringList suggestedPreviewIcons = {
+        "icon-launcher-messaging",
+        "icon-launcher-weather",
+        "icon-launcher-camera",
+        "icon-launcher-browser",
+        "icon-launcher-clock",
+        "icon-launcher-calendar",
+    };
+
+    for (const auto &iconName : suggestedPreviewIcons) {
+        const auto iconPath = findJollaIcon(iconName);
+
+        if (iconPath.isEmpty())
+            continue;
+
+        m_previewIcons.append(iconPath);
+
+        if (m_previewIcons.size() >= requiredPreviewsCount)
+            return;
+    }
+
+    // Preview will be constructed from apk or third-party icons if none of
+    // Jolla apps icons is available
+
+    const auto apkIcons = m_apkIcons.keys();
+
+    for (const auto &iconName : apkIcons) {
+        if (m_previewIcons.size() >= requiredPreviewsCount)
+            return;
+
+        const auto iconPath = findApkIcon(iconName);
+
+        if (iconPath.isEmpty())
+            continue;
+
+        m_previewIcons.append(iconPath);
+    }
+
+    const auto nativeIcons = m_nativeIcons.keys();
+
+    for (const auto &iconName : nativeIcons) {
+        if (m_previewIcons.size() >= requiredPreviewsCount)
+            return;
+
+        const auto iconPath = findNativeIcon(iconName);
+
+        if (iconPath.isEmpty())
+            continue;
+
+        m_previewIcons.append(iconPath);
+    }
 }
