@@ -32,13 +32,14 @@ Requires: Requires: %{name} = %{version}-%{release}
 %autosetup
 
 %build
-%qmake5 -r VERSION=%{version}
+%qmake5 -r \
+    USERUNITDIR=%{_userunitdir} \
+    VERSION=%{version}
 %make_build
 
 %install
 %make_install
 
-install -Dm644 daemon/clockwork.service %{buildroot}%{_userunitdir}/clockwork.service
 install -dm755 %{buildroot}%{_userunitdir}/user-session.target.wants/
 ln -s ../clockwork.service %{buildroot}%{_userunitdir}/user-session.target.wants/
 

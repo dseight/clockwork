@@ -12,4 +12,7 @@ SOURCES += daemon.cpp
 
 target.path = /usr/bin
 
-INSTALLS += target
+systemd.files = clockwork.service
+systemd.path = $$USERUNITDIR
+
+INSTALLS += target systemd
