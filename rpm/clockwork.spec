@@ -11,6 +11,7 @@ BuildRequires: pkgconfig(Qt5Qml)
 BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: pkgconfig(sailfishsilica)
 BuildRequires: qt5-qttools-linguist
+BuildRequires: systemd
 Provides: harbour-themepacksupport = 0.8.9-1
 Conflicts: harbour-dyncal
 Conflicts: harbour-dynclock
@@ -37,9 +38,9 @@ Requires: Requires: %{name} = %{version}-%{release}
 %install
 %make_install
 
-install -Dm644 daemon/clockwork.service %{buildroot}%{_libdir}/systemd/user/clockwork.service
-install -dm755 %{buildroot}%{_libdir}/systemd/user/user-session.target.wants/
-ln -s ../clockwork.service %{buildroot}%{_libdir}/systemd/user/user-session.target.wants/
+install -Dm644 daemon/clockwork.service %{buildroot}%{_userunitdir}/clockwork.service
+install -dm755 %{buildroot}%{_userunitdir}/user-session.target.wants/
+ln -s ../clockwork.service %{buildroot}%{_userunitdir}/user-session.target.wants/
 
 # Prepare directory for storing generated icons, so it will be owned by package
 mkdir -p %{buildroot}%{_datadir}/%{name}/icons
@@ -52,8 +53,8 @@ mkdir -p %{buildroot}%{_datadir}/%{name}/icons
 %{_datadir}/jolla-settings/entries/%{name}.json
 %{_libdir}/*.so.*
 %{_libdir}/qt5/qml/com/dseight/%{name}
-%{_libdir}/systemd/user/%{name}.service
-%{_libdir}/systemd/user/user-session.target.wants/%{name}.service
+%{_userunitdir}/%{name}.service
+%{_userunitdir}/user-session.target.wants/%{name}.service
 
 %files devel
 %defattr(-,root,root,-)
