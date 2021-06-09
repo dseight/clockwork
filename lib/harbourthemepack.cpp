@@ -111,18 +111,19 @@ QString HarbourThemePack::displayName()
 
 QStringList HarbourThemePack::icons()
 {
-    QStringList icons;
+    if (!m_icons.isEmpty())
+        return m_icons;
 
     for (const auto &iconName : m_jollaIcons.keys())
-        icons += findJollaIcon(iconName);
+        m_icons += findJollaIcon(iconName);
 
     for (const auto &iconName : m_nativeIcons.keys())
-        icons += findNativeIcon(iconName);
+        m_icons += findNativeIcon(iconName);
 
     for (const auto &iconName : m_apkIcons.keys())
-        icons += findApkIcon(iconName);
+        m_icons += findApkIcon(iconName);
 
-    return icons;
+    return m_icons;
 }
 
 QStringList HarbourThemePack::previewIcons()

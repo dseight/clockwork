@@ -31,6 +31,7 @@ private:
 private:
     QString m_path;
     QString m_displayName;
+    QStringList m_icons;
     QStringList m_previewIcons;
 
     // Icon name -> scale/size mappings (e.g. "icon-launcher-shell" -> "z1.75")
